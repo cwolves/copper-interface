@@ -17,6 +17,9 @@ It can be deployed using the AWS CDK, from your command line.
 
 ### Quick Start
 
+0. Install libraries
+    `npm install aws-cdk`
+    `pip install -r requirements.txt`
 1. Clone this repository onto your local machine.
 
     `git clone git@github.com:arctype-dev/copper-interface.git`
