@@ -42,17 +42,8 @@ class CopperInterfaceStack(Stack):
             "dependencies-layer",
             runtime=_lambda.Runtime.PYTHON_3_9,
             handler="send.lambda_handler",
-            code=_lambda.Code.from_asset("copper_interface/lambdas/forwarder"),
-            environment=forwarder_environment,
-            function_name="copper-log-forwarder",
-        )
-
-        # lambda layer version for the python requests library
-        dependencies_layer = _lambda.LayerVersion(
-            self,
-            "forwarder-dependencies-layer",
             code=_lambda.Code.from_asset(
-                "copper_interface/lambdas/dependencies",
+                "copper_interface/lambdas/forwarder",
                 bundling={
                     "image": _lambda.Runtime.PYTHON_3_9.bundling_image,
                     "command": [
@@ -62,12 +53,9 @@ class CopperInterfaceStack(Stack):
                     ],
                 },
             ),
-            compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
-            layer_version_name="copper/forwarder-dependencies-layer",
+            environment=forwarder_environment,
+            function_name="copper-log-forwarder",
         )
-
-        # add the layer to the lambda function
-        log_forwarder.add_layers(dependencies_layer)
 
         # holds logs
         bucket_logs = s3.Bucket(
