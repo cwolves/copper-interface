@@ -44,6 +44,7 @@ class CopperInterfaceStack(Stack):
             handler="send.lambda_handler",
             code=_lambda.Code.from_asset("copper_interface/lambdas/forwarder"),
             environment=forwarder_environment,
+            function_name="copper/log-forwarder",
         )
 
         # lambda layer version for the python requests library
@@ -76,7 +77,8 @@ class CopperInterfaceStack(Stack):
 
         # trigger the lambda function when a new file is added to the bucket
         bucket_logs.add_event_notification(
-            s3.EventType.OBJECT_CREATED, s3n.LambdaDestination(log_forwarder)
+            s3.EventType.OBJECT_CREATED,
+            s3n.LambdaDestination(log_forwarder),
         )
 
         # give the lambda function permission to access the bucket
