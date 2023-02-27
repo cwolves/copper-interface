@@ -63,6 +63,7 @@ class CopperInterfaceStack(Stack):
                 },
             ),
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
+            layer_version_name="copper/forwarder-dependencies-layer",
         )
 
         # add the layer to the lambda function
