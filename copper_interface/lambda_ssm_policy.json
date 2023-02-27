@@ -1,0 +1,6 @@
+{
+  "Sid": "AllowLambdaToAccessParameterStoreFolder",
+  "Effect": "Allow",
+  "Action": ["ssm:GetParametersByPath"],
+  "Resource": "arn:aws:ssm:<region>:<account-id>:parameter/copper/logslash/*"
+}
