@@ -41,7 +41,8 @@ It can be deployed using the AWS CDK, from your command line.
 
     ![SSM Parameter Values](./readme_img/set_splunk_param.png)
 
-6. Drop files into the bucket.
+6. Now that everything is set up, drop files into the bucket `copper-logs-bucket`. The files should be in the json, csv, or clf format. The files will be processed, reduced in size, and sent to the Splunk HEC endpoint you configured.
+
 7. If you'd like to delete the resources you created:
 
     `cdk destroy`

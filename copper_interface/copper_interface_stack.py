@@ -71,6 +71,7 @@ class CopperInterfaceStack(Stack):
         bucket_logs = s3.Bucket(
             self,
             "copper-logs-bucket",
+            bucket_name="copper-logs-bucket",
         )
 
         # trigger the lambda function when a new file is added to the bucket
