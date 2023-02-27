@@ -1,26 +1,50 @@
 # Copper Interface
 
-This repo is intended to be cloned and pushed into CodeCommit within your own AWS account. Once it is in CodeCommit, you can create a CodePipeline from the provided yaml file. This pipeline creates a cdk stack which deploys a few resources that can get you started with the Copper API.
+This repository contains infrastructure as code to quickly get started with the Copper API.
+
+It can be deployed using the AWS CDK, from your command line.
 
 ## Getting Started
 
 ### Prerequisites
 
+- npm, Node.js
+- Python
 - AWS Account
 - AWS CLI Access
-- Splunk [HEC](https://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector) Endpoint
+- AWS CDK
+- Splunk [HEC Endpoint](https://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector)
 
-### Installing
+### Quick Start
 
-TODO: make better
+1. Clone this repository onto your local machine.
 
-1. Clone this repo onto your local machine
-TODO: clone with repo url command
-2. Set a remote branch to your own CodeCommit repo
-3. Create a CodePipeline from the provided yaml file
-4. Run the pipeline
-5. Update the SSM parameters with your Splunk configuration
-6. Drop files into the bucket
+    `git clone git@github.com:arctype-dev/copper-interface.git`
+
+2. Change into the directory.
+
+    `cd copper-interface`
+
+3. Bootstrap the CDK. This creates a stack with the resources required to deploy a stack via the CDK. You can see the stack in CloudFormation.
+
+    `cdk bootstrap`
+
+4. Deploy the stack. This creates the resources in your AWS account. You can see the stack in CloudFormation.
+
+    `cdk deploy`
+
+5. Update the SSM parameters with your Splunk configuration.
+    In your AWS console, go to Systems Manager > Parameter Store. You should see two parameters that were created by the stack. Update the values with your Splunk configuration.
+    ![SSM Parameters](./readme_img/splunk_ssm_parameters.png)
+
+    Edit each parameter and update the values.
+
+    ![SSM Parameter Values](./readme_img/set_splunk_param.png)
+
+6. Drop files into the bucket.
+7. If you'd like to delete the resources you created:
+
+    `cdk destroy`
 
 ## Resources
 

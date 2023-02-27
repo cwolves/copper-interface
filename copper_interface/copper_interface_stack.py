@@ -1,3 +1,4 @@
+import os
 from aws_cdk import (
     Stack,
     aws_s3 as s3,
@@ -15,8 +16,7 @@ class CopperInterfaceStack(Stack):
 
         # intialize some environmetn variables for the lambda function
         forwarder_environment = {
-            "copper_receiver_url": "TODO",
-            "AWS_REGION": self.region,
+            "copper_receiver_url": "https://7ulq5dkwhuz7slwuf42p7cxxfe0pfghi.lambda-url.us-west-2.on.aws/",
         }
 
         # splunk parameters in order to send logs to splunk
@@ -71,7 +71,6 @@ class CopperInterfaceStack(Stack):
         bucket_logs = s3.Bucket(
             self,
             "copper-logs-bucket",
-            description="Logs uploaded here will be forwarded to Copper and ",
         )
 
         # trigger the lambda function when a new file is added to the bucket
@@ -83,6 +82,7 @@ class CopperInterfaceStack(Stack):
         bucket_logs.grant_read(log_forwarder)
 
         # lambda policy to access parameter store
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         with open("lambda_ssm_policy.json", "r") as f:
             lambda_ssm_policy = json.load(f)
 

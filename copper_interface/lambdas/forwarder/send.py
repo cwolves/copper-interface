@@ -7,17 +7,14 @@ def lambda_handler(event, context):
     for record in event["Records"]:
         bucket_name = record["s3"]["bucket"]["name"]
         object_key = record["s3"]["object"]["key"]
-        # TODO: probably use the size for something
         object_size = record["s3"]["object"]["size"]
     s3 = boto3.resource(
         service_name="s3",
-        region_name=os.environ["AWS_REGION"],
     )
     bucket = s3.Bucket(bucket_name)
     # read in log data
     log_data = bucket.Object(object_key).get()["Body"].read().decode("utf-8")
 
-    # TODO: get splunk parameters from ssm
     param_store = boto3.client("ssm")
     try:
         response = param_store.get_parameter(
@@ -50,4 +47,3 @@ def lambda_handler(event, context):
             "This should not require any configuration. Something went wrong when deploying the stack."
         )
         raise e
-
