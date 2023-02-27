@@ -44,7 +44,7 @@ class CopperInterfaceStack(Stack):
             handler="send.lambda_handler",
             code=_lambda.Code.from_asset("copper_interface/lambdas/forwarder"),
             environment=forwarder_environment,
-            function_name="copper/log-forwarder",
+            function_name="copper-log-forwarder",
         )
 
         # lambda layer version for the python requests library
