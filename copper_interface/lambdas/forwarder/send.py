@@ -35,6 +35,9 @@ def lambda_handler(event, context):
                 "splunk_host": splunk_host,
                 "splunk_hec_token": splunk_hec_token,
                 "log_data": log_data,
+                "copper_api_token": "",
+                "sentinel": "",
+                "log_type",
             },
         )
 

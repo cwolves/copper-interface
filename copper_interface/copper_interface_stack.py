@@ -6,6 +6,7 @@ from aws_cdk import (
     aws_lambda as _lambda,
     aws_ssm as ssm,
     aws_iam as iam,
+    Duration,
 )
 import json
 
@@ -35,11 +36,11 @@ class CopperInterfaceStack(Stack):
                 # this needs to be replaced by the end user
                 string_value="PLACEHOLDER_VALUE",
             )
-            forwarder_environment[param.upper()] = param_name
+            forwarder_environment[param] = param_name
 
         log_forwarder = _lambda.Function(
             self,
-            "dependencies-layer",
+            "copper-log-forwarder",
             runtime=_lambda.Runtime.PYTHON_3_9,
             handler="send.lambda_handler",
             code=_lambda.Code.from_asset(
@@ -55,13 +56,24 @@ class CopperInterfaceStack(Stack):
             ),
             environment=forwarder_environment,
             function_name="copper-log-forwarder",
+            memory_size=1024,
+            timeout=Duration.minutes(15),
+            role=iam.Role(
+                self,
+                "copper-classify-role",
+                assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+                managed_policies=[
+                    iam.ManagedPolicy.from_aws_managed_policy_name(
+                        "service-role/AWSLambdaBasicExecutionRole",
+                    ),
+                ],
+            ),
         )
 
         # holds logs
         bucket_logs = s3.Bucket(
             self,
             "copper-logs-bucket",
-            bucket_name="copper-logs-bucket",
         )
 
         # trigger the lambda function when a new file is added to the bucket
