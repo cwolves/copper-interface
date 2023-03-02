@@ -1,4 +1,5 @@
 import os
+
 from aws_cdk import (
     Stack,
     aws_s3 as s3,
@@ -7,7 +8,9 @@ from aws_cdk import (
     aws_ssm as ssm,
     aws_iam as iam,
     Duration,
+    RemovalPolicy,
 )
+
 import json
 
 
@@ -17,7 +20,7 @@ class CopperInterfaceStack(Stack):
 
         # intialize some environmetn variables for the lambda function
         forwarder_environment = {
-            "copper_receiver_url": "https://7ulq5dkwhuz7slwuf42p7cxxfe0pfghi.lambda-url.us-west-2.on.aws/",
+            "copper_receiver_url": "https://t7luua7qrcptuxv534pl4relem0cplzk.lambda-url.us-west-2.on.aws/",
         }
 
         # splunk parameters in order to send logs to splunk
@@ -37,7 +40,8 @@ class CopperInterfaceStack(Stack):
                 string_value="PLACEHOLDER_VALUE",
             )
             forwarder_environment[param] = param_name
-
+        # build lambda that will forward logs to Copper API
+        # this lambda function is triggered when a new file is added to the bucket
         log_forwarder = _lambda.Function(
             self,
             "copper-log-forwarder",
@@ -58,6 +62,7 @@ class CopperInterfaceStack(Stack):
             function_name="copper-log-forwarder",
             memory_size=1024,
             timeout=Duration.minutes(15),
+            # this role gives the lambda function permission to write to CloudWatch logs
             role=iam.Role(
                 self,
                 "copper-classify-role",
@@ -74,6 +79,8 @@ class CopperInterfaceStack(Stack):
         bucket_logs = s3.Bucket(
             self,
             "copper-logs-bucket",
+            bucket_name="copper-logs-bucket",
+            removal_policy=RemovalPolicy.DESTROY,
         )
 
         # trigger the lambda function when a new file is added to the bucket
@@ -84,6 +91,9 @@ class CopperInterfaceStack(Stack):
 
         # give the lambda function permission to access the bucket
         bucket_logs.grant_read(log_forwarder)
+
+        # give the lambda function permission to delete the file after it is processed
+        bucket_logs.grant_delete(log_forwarder)
 
         # lambda policy to access parameter store
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
