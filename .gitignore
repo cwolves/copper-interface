@@ -10,3 +10,4 @@ __pycache__
 cdk.out
 .venv*
 *.mp4
+example_logs_big.json

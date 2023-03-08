@@ -36,33 +36,57 @@ def lambda_handler(event, context):
         lambda_fn_url = os.environ["copper_receiver_url"]
         # load log_data as a dict
         log_data_dict = json.loads(log_data)
-        # is a json array
-        # send logs 2500 at a time
-        if len(log_data_dict) > 2500:
-            for i in range(0, len(log_data_dict), 2500):
-                log_data = log_data_dict[i : i + 2500]
+        log_data_size = len(log_data.encode("utf-8"))
+        batch_size = log_data_size // 6091456
+
+        # average the first 100 lines if available to figure out bytes per line
+        if len(log_data_dict) > 100:
+            log_data_dict_sample = log_data_dict[:100]
+        else:
+            log_data_dict_sample = log_data_dict
+        bytes_per_line = 0
+        for log in log_data_dict_sample:
+            bytes_per_line += len(json.dumps(log).encode("utf-8"))
+        bytes_per_line = bytes_per_line // len(log_data_dict_sample)
+        batch_size = 5000000 // bytes_per_line
+        # round down to nearest 1000
+        batch_size = batch_size // 1000 * 1000
+
+        print("batch size", batch_size)
+        print("bytes per line", bytes_per_line)
+        print("log data size", log_data_size)
+
+        if len(log_data_dict) > batch_size:
+            for i in range(0, len(log_data_dict), batch_size):
+                log_data = log_data_dict[i : i + batch_size]
                 log_data = json.dumps(log_data)
-                response = requests.post(
-                    lambda_fn_url,
-                    json={
-                        "splunk_host": splunk_host,
-                        "splunk_hec_token": splunk_hec_token,
-                        "log_data": log_data,
-                        "copper_api_token": "",
-                        "log_type": f"{file_extension}",
-                    },
-                )
+                try:
+                    requests.post(
+                        lambda_fn_url,
+                        json={
+                            "splunk_host": splunk_host,
+                            "splunk_hec_token": splunk_hec_token,
+                            "log_data": log_data,
+                            "copper_api_token": "",
+                            "log_type": "json",
+                        },
+                        timeout=0.0000000001,
+                    )
+                # hack to not wait for response
+                except requests.exceptions.ConnectTimeout:
+                    pass
 
         # delete the file from the bucket
         bucket.Object(object_key).delete()
 
-        print('All done!')
+        print("All done!")
 
     except Exception as e:
         print(
             "This should only require Splunk parameter store configuration. Something went wrong when deploying the stack."
         )
         raise e
+
 
 def write_error(bucket, error_txt):
     bucket.put_object(
