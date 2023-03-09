@@ -15,6 +15,11 @@ It can be deployed using the AWS CDK, from your command line.
 - AWS CDK
 - Splunk [HEC Endpoint](https://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector)
 
+### Quickest Start
+
+Use the example Python script `send_logs.py` to send logs to our api. You will need to update the `splunk_host` and `splunk_hec_token` variables with your own values.
+
+
 ### Quick Start
 
 0. Install libraries

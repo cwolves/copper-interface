@@ -40,8 +40,13 @@ def send_logs_to_cwolves(json_log_str, splunk_hec_token, splunk_host):
             log_data = log_data_dict[i : i + batch_size]
             log_data = json.dumps(log_data)
             try:
+                url = "https://copper.p.rapidapi.com/slash"
+                headers = {
+                    "X-RapidAPI-Key": "25bd864c53msha9976c156c6791ap1eb57djsn2eb7a61dedbc",
+                    "X-RapidAPI-Host": "copper.p.rapidapi.com"
+                }
                 response = requests.post(
-                    "https://t7luua7qrcptuxv534pl4relem0cplzk.lambda-url.us-west-2.on.aws/",
+                    url,
                     json={
                         "splunk_host": splunk_host,
                         "splunk_hec_token": splunk_hec_token,
@@ -49,8 +54,10 @@ def send_logs_to_cwolves(json_log_str, splunk_hec_token, splunk_host):
                         "copper_api_token": "",  # not used yet
                         "log_type": "json",  # not used yet
                     },
-                    timeout=0.0000000001,
+                    headers=headers,
+                    # timeout=0.0000000001,
                 )
+                print(response.status_code, response.text)
             # hack to not wait for response
             except requests.exceptions.ConnectTimeout:
                 pass
