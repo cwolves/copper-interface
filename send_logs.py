@@ -36,6 +36,7 @@ def send_logs_to_cwolves(json_log_str, splunk_hec_token, splunk_host):
     print("log data size", log_data_size)
 
     if len(log_data_dict) > batch_size:
+        responses = []
         for i in range(0, len(log_data_dict), batch_size):
             log_data = log_data_dict[i : i + batch_size]
             log_data = json.dumps(log_data)
@@ -52,11 +53,11 @@ def send_logs_to_cwolves(json_log_str, splunk_hec_token, splunk_host):
                     },
                     # timeout=0.0000000001,
                 )
-                print(response.status_code, response.text)
+                # print(response.status_code, response.text)
             # hack to not wait for response
             except requests.exceptions.ConnectTimeout:
                 pass
-            # print(response.status_code, response.text)
+            responses.append(response)
             print(
                 "percent done",
                 (i / len(log_data_dict)) * 100,
@@ -64,15 +65,10 @@ def send_logs_to_cwolves(json_log_str, splunk_hec_token, splunk_host):
                 "time taken",
                 time.time() - start_time,
                 "seconds",
-                "minutes",
-                (time.time() - start_time) / 60,
             )
     end_time = time.time()
-    print(
-        f"All done! Time taken: {end_time - start_time} seconds",
-        "Minutes: ",
-        (end_time - start_time) / 60,
-    )
+    print(f"All done! Time taken: {end_time - start_time} seconds")
+    return responses
 
 
 if __name__ == "__main__":
@@ -82,4 +78,11 @@ if __name__ == "__main__":
     splunk_hec_token = "4549d728-f40b-409d-8d48-6f6bc5d9edfd"  # TODO: change this
     splunk_host = "prd-p-y2slg"  # TODO: change this
 
-    send_logs_to_cwolves(log_data, splunk_hec_token, splunk_host)
+    responses = send_logs_to_cwolves(log_data, splunk_hec_token, splunk_host)
+
+    # aggreagte all of the json responses and save as a json file
+    responses_json = ""
+    for response in responses:
+        responses_json += response.text
+    with open("./log_data/responses.json", "w") as f:
+        f.write(responses_json)
