@@ -8,6 +8,7 @@ def lambda_handler(event, context):
     for record in event["Records"]:
         bucket_name = record["s3"]["bucket"]["name"]
         object_key = record["s3"]["object"]["key"]
+        # TODO: use file size and extension with copper api
         object_size = record["s3"]["object"]["size"]
         file_extension = object_key.split(".")[-1]
     s3 = boto3.resource(
@@ -28,6 +29,12 @@ def lambda_handler(event, context):
             Name=os.environ["splunk_hec_token"], WithDecryption=False
         )
         splunk_hec_token = splunk_hec_token["Parameter"]["Value"]
+
+        copper_api_token = param_store.get_parameter(
+            Name=os.environ["copper_api_token"], WithDecryption=False
+        )
+
+        copper_api_token = copper_api_token["Parameter"]["Value"]
 
         # TODO: safeguard when they forget to update parameter store value
         # write_error(bucket, "Please update the parameter store values for splunk_host and splunk_hec_token")
@@ -67,15 +74,16 @@ def lambda_handler(event, context):
                             "splunk_host": splunk_host,
                             "splunk_hec_token": splunk_hec_token,
                             "log_data": log_data,
-                            "copper_api_token": "",
+                            "copper_api_token": copper_api_token,
                             "log_type": "json",
                         },
+                        # hack to not wait for response
                         timeout=0.0000000001,
                     )
                 # hack to not wait for response
                 except requests.exceptions.ConnectTimeout:
                     pass
-
+        # TODO: consider moving the file somewhere
         # delete the file from the bucket
         bucket.Object(object_key).delete()
 

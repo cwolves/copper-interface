@@ -18,7 +18,7 @@ class CopperInterfaceStack(Stack):
     def __init__(self, scope, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # intialize some environmetn variables for the lambda function
+        # intialize some environment variables for the lambda function
         forwarder_environment = {
             "copper_receiver_url": "https://t7luua7qrcptuxv534pl4relem0cplzk.lambda-url.us-west-2.on.aws/",
         }
@@ -27,6 +27,7 @@ class CopperInterfaceStack(Stack):
         params = {
             "splunk_host": "The host name of the splunk instance. e.g. prd-p-foxn4",
             "splunk_hec_token": "The token used to send logs to splunk. e.g. 1234-5678-9012-3456",
+            "copper_api_token": "The token from cwolves.com to give access to the Copper API",
         }
 
         for param, description in params.items():
@@ -75,7 +76,7 @@ class CopperInterfaceStack(Stack):
             ),
         )
 
-        # holds logs
+        # log destination
         bucket_logs = s3.Bucket(
             self,
             "copper-logs-bucket",
