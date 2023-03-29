@@ -1,5 +1,4 @@
 import os
-
 from aws_cdk import (
     Stack,
     aws_s3 as s3,
@@ -20,7 +19,7 @@ class CopperInterfaceStack(Stack):
 
         # intialize some environment variables for the lambda function
         forwarder_environment = {
-            "copper_receiver_url": "https://t7luua7qrcptuxv534pl4relem0cplzk.lambda-url.us-west-2.on.aws/",
+            "copper_receiver_url": "https://zof5dm3d636vqsqssv65rhs5f40qhsde.lambda-url.us-west-2.on.aws/",
         }
 
         # splunk parameters in order to send logs to splunk
@@ -77,10 +76,11 @@ class CopperInterfaceStack(Stack):
         )
 
         # log destination
+        # TODO: bucket name has to be globally unique which prevents us from using a static name...
         bucket_logs = s3.Bucket(
             self,
-            "copper-logs-bucket",
-            bucket_name="copper-logs-bucket",
+            "copper-logs-destination",
+            # bucket_name=f"copper-logs-destination-{uuid.uuid4()}",
             removal_policy=RemovalPolicy.DESTROY,
         )
 

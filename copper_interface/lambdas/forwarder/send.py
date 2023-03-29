@@ -36,6 +36,15 @@ def lambda_handler(event, context):
 
         copper_api_token = copper_api_token["Parameter"]["Value"]
 
+        print(
+            "got host",
+            splunk_host,
+            "got token",
+            splunk_hec_token,
+            "got api token",
+            copper_api_token,
+        )
+
         # TODO: safeguard when they forget to update parameter store value
         # write_error(bucket, "Please update the parameter store values for splunk_host and splunk_hec_token")
 
@@ -74,11 +83,11 @@ def lambda_handler(event, context):
                             "splunk_host": splunk_host,
                             "splunk_hec_token": splunk_hec_token,
                             "log_data": log_data,
-                            "copper_api_token": copper_api_token,
+                            "api_token": copper_api_token,
                             "log_type": "json",
                         },
                         # hack to not wait for response
-                        timeout=0.0000000001,
+                        # timeout=0.0000000001,
                     )
                 # hack to not wait for response
                 except requests.exceptions.ConnectTimeout:
@@ -93,6 +102,7 @@ def lambda_handler(event, context):
         print(
             "This should only require Splunk parameter store configuration. Something went wrong when deploying the stack."
         )
+        print(e)
         raise e
 
 

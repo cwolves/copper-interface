@@ -41,7 +41,7 @@ def send_logs_to_cwolves(json_log_str, splunk_hec_token, splunk_host):
             log_data = log_data_dict[i : i + batch_size]
             log_data = json.dumps(log_data)
             try:
-                url = "https://t7luua7qrcptuxv534pl4relem0cplzk.lambda-url.us-west-2.on.aws/"
+                url = "https://zof5dm3d636vqsqssv65rhs5f40qhsde.lambda-url.us-west-2.on.aws/"
                 response = requests.post(
                     url,
                     json={
