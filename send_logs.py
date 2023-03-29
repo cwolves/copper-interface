@@ -10,7 +10,7 @@ def send_logs_to_cwolves(json_log_str, splunk_hec_token, splunk_host):
     print("processing", len(log_data_dict), "logs")
     start_time = time.time()
 
-    # we can only send 6291456 bytes at a time
+    # we can only send 6291456 bytes at a time due to an aws lambda limitation
     # we need to find a batch size roughly equivalent to 6291456 bytes
     # 6291456 bytes = 6.29 MB
 
@@ -28,7 +28,7 @@ def send_logs_to_cwolves(json_log_str, splunk_hec_token, splunk_host):
         bytes_per_line += len(json.dumps(log).encode("utf-8"))
     bytes_per_line = bytes_per_line // len(log_data_dict_sample)
     batch_size = 5000000 // bytes_per_line
-    # round down to nearest 1000
+    # round down to nearest 1000 log lines
     batch_size = batch_size // 1000 * 1000
 
     print("batch size", batch_size)
@@ -41,19 +41,20 @@ def send_logs_to_cwolves(json_log_str, splunk_hec_token, splunk_host):
             log_data = log_data_dict[i : i + batch_size]
             log_data = json.dumps(log_data)
             try:
-                url = "https://t7luua7qrcptuxv534pl4relem0cplzk.lambda-url.us-west-2.on.aws/"
+                url = "https://zof5dm3d636vqsqssv65rhs5f40qhsde.lambda-url.us-west-2.on.aws/"
                 response = requests.post(
                     url,
                     json={
                         "splunk_host": splunk_host,
                         "splunk_hec_token": splunk_hec_token,
                         "log_data": log_data,
-                        "api_token": "cw_SEIBdxmJewJnJav75jX9I3ftQFFfvPbW",
+                        "api_token": "cw_GLAS2qMNhtRSGQDfeHw4695NO63f7VDq",
                         "log_type": "json",  # not used yet
                     },
+                    # hack to not wait for response
                     # timeout=0.0000000001,
                 )
-                # print(response.status_code, response.text)
+                print(response.status_code)
             # hack to not wait for response
             except requests.exceptions.ConnectTimeout:
                 pass
@@ -75,12 +76,13 @@ if __name__ == "__main__":
     with open("./log_data/example_logs.json") as f:
         log_data = f.read()
 
-    splunk_hec_token = "4549d728-f40b-409d-8d48-6f6bc5d9edfd"  # TODO: change this
-    splunk_host = "prd-p-y2slg"  # TODO: change this
+    # PASS IN YOUR OWN SPLUNK PARAMETERS
+    splunk_hec_token = "220f4d97-ccc7-4f2f-89a3-5e31f171b907"
+    splunk_host = "prd-p-91czz"  # TODO: change this
 
     responses = send_logs_to_cwolves(log_data, splunk_hec_token, splunk_host)
 
-    # aggreagte all of the json responses and save as a json file
+    # aggregate all of the json responses and save as a json file
     responses_json = ""
     for response in responses:
         responses_json += response.text
