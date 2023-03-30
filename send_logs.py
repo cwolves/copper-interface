@@ -3,7 +3,9 @@ import requests
 import json
 
 
-def send_logs_to_cwolves(json_log_str, splunk_hec_token, splunk_host):
+def send_logs_to_cwolves(
+    json_log_str, splunk_hec_token, splunk_host, splunk_index="main"
+):
     log_data_dict = json.loads(json_log_str)
     # is a json array
     # send logs 25_000 at a time
@@ -50,23 +52,25 @@ def send_logs_to_cwolves(json_log_str, splunk_hec_token, splunk_host):
                         "log_data": log_data,
                         "api_token": "cw_GLAS2qMNhtRSGQDfeHw4695NO63f7VDq",
                         "log_type": "json",  # not used yet
+                        "splunk_index": splunk_index,
                     },
                     # hack to not wait for response
                     # timeout=0.0000000001,
                 )
+                responses.append(response)
+                print(
+                    "percent done",
+                    (i / len(log_data_dict)) * 100,
+                    "%",
+                    "time taken",
+                    time.time() - start_time,
+                    "seconds",
+                )
                 print(response.status_code)
-            # hack to not wait for response
             except requests.exceptions.ConnectTimeout:
+                # hack to not wait for response
                 pass
-            responses.append(response)
-            print(
-                "percent done",
-                (i / len(log_data_dict)) * 100,
-                "%",
-                "time taken",
-                time.time() - start_time,
-                "seconds",
-            )
+
     end_time = time.time()
     print(f"All done! Time taken: {end_time - start_time} seconds")
     return responses
@@ -80,7 +84,9 @@ if __name__ == "__main__":
     splunk_hec_token = "220f4d97-ccc7-4f2f-89a3-5e31f171b907"
     splunk_host = "prd-p-91czz"  # TODO: change this
 
-    responses = send_logs_to_cwolves(log_data, splunk_hec_token, splunk_host)
+    responses = send_logs_to_cwolves(
+        log_data, splunk_hec_token, splunk_host, splunk_index="copper-demo"
+    )
 
     # aggregate all of the json responses and save as a json file
     responses_json = ""
