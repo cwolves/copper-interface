@@ -2,29 +2,36 @@
 
 This repository contains infrastructure as code to quickly get started with the Copper API.
 
-It can be deployed using the AWS CDK, from your command line.
+For support, reach out to thatcher@cwolves.com.
 
-## Getting Started
+## Copper API
+
+The Copper API sits between your log producers and your SIEM. It doesn't matter where these producers exist as long as they can send their JSON log data to the Copper API.
+
+One way to facilitate this process is to push all of your logs to a bucket and use a Lambda to forward them to the Copper API. This repository is allows you to instantly set up the AWS resources via their CDK for this pattern.
+
+Additionally, this repository contains an example Python script that shows how to send logs to the Copper API directly.
+
+## Quickest Start (Python Script)
+
+Use the example Python script `send_logs.py` to send logs to our api. You will need to update the `splunk_host`, `splunk_hec_token`, and `api_token` variables with your own values.
+
+## Quick Start (AWS CDK)
 
 ### Prerequisites
 
-- npm, Node.js
-- Python
-- AWS Account
-- AWS CLI Access
-- AWS CDK
-- Splunk [HEC Endpoint](https://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector)
+- npm, Node.js [Install](https://nodejs.org/en/download/)
+- Python [Install](https://www.python.org/downloads/)
+- AWS Account [Sign Up](https://aws.amazon.com/)
+- AWS CLI Access [Instructions](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
+- AWS CDK [Guide](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html)
+- Splunk HEC Endpoint [Guide](https://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector)
 
-### Quickest Start
-
-Use the example Python script `send_logs.py` to send logs to our api. You will need to update the `splunk_host` and `splunk_hec_token` variables with your own values.
-
-
-### Quick Start
-
-0. Install libraries
-    `npm install aws-cdk`
-    `pip install -r requirements.txt`
+0. Prerequisites  
+    Install Libraries  
+    `npm i -g aws-cdk`  
+    `pip install -r requirements.txt`  
+    [Sign Up](https://cwolves.com) for a Cwolves Account
 1. Clone this repository onto your local machine.
 
     `git clone git@github.com:arctype-dev/copper-interface.git`
@@ -42,38 +49,41 @@ Use the example Python script `send_logs.py` to send logs to our api. You will n
     `cdk deploy`
 
 5. Update the SSM parameters with your Splunk configuration.
-    In your AWS console, go to Systems Manager > Parameter Store. You should see two parameters that were created by the stack. Update the values with your Splunk configuration.
-    ![SSM Parameters](./readme_img/splunk_ssm_parameters.png)
+    In your AWS console, go to Systems Manager > Parameter Store. You should see three parameters that were created by the stack. Update the values with your Splunk configuration and token from [Cwolves Dashboard](https://cwolves.com/dashboard).
+
+    ![SSM Parameters](./readme_img/aws_parameter_store.png)
 
     Edit each parameter and update the values.
 
     ![SSM Parameter Values](./readme_img/set_splunk_param.png)
 
-6. Now that everything is set up, drop files into the bucket `copper-logs-bucket`. The files should be in the json, csv, or clf format. The files will be processed, reduced in size, and sent to the Splunk HEC endpoint you configured.
+6. Now that everything is set up, drop files into the bucket `copperinterfacestack-copperlogsdestination`. The files should be in the json format. The files will be processed, reduced in size, and sent to the Splunk HEC endpoint you configured.
 
-7. If you'd like to delete the resources you created:
+    ![Bucket](./readme_img/logs_bucket.png)
+
+7. At anytime, if you'd like to completely the resources you created:
 
     `cdk destroy`
 
 ## Resources
 
-This stack creates resources that will enable you to drop logs into a bucket, and have the reduced version sent to Splunk.
+This stack creates resources that will enable you to drop logs into a bucket, and have the slashed version sent to Splunk.
 
 ### Log Bucket
 
-The stack includes a single bucket to drop logs into. Simply upload a file with you logs in the json, csv, or clf format. This bucket is NOT for long term storage, the files are deleted once they are processed by the forwarder lambda.
+The stack includes a single bucket to drop logs into. Simply upload a file with you logs in the json format. This bucket is NOT for long term storage, the files are deleted once they are processed by the forwarder lambda.
 
 #### Lambda Event Notification
 
 The bucket is configured to send an event notification to a lambda function when a file is dropped into the bucket. This will trigger the lambda to pull the file from the bucket and send it to Copper for processing along with your Splunk configuration parameters.
 
-### Splunk Data in Systems Manager Parameter Store
+### Systems Manager Parameter Store
 
-The stack initializes two parameters that you need to update with your own values. The first is `splunk_host` which is the hostname of your Splunk instance (e.g. 'prd-p-foxn4'). The second is `splunk_hec_token` which is the Authorization token for a Splunk HEC endpoint that you created.
+The stack initializes three parameters that you need to update with your own values. The first is `splunk_host` which is the hostname of your Splunk instance (e.g. 'prd-p-foxn4'). The second is `splunk_hec_token` which is the Authorization token for a Splunk HEC endpoint that you created. The third is `copper_api_token`
 
 ### Forwarder Lambda
 
-The stack creates a lambda function that will be triggered by the bucket. The lambda function will take the file that was dropped into the bucket, and send it to Splunk. Then, it will delete the file from the bucket.
+The stack creates a lambda function that will be triggered by the bucket. The lambda function will take the file that was dropped into the bucket, and send the api token, splunk secrets, and data to the Copper API. Then, it will delete the file from the bucket.
 
 #### Policies
 
