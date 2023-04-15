@@ -4,14 +4,21 @@ import json
 
 
 def send_logs_to_cwolves(
-    json_log_str, splunk_hec_token, splunk_host, api_token, splunk_index="main"
+    json_log_str,
+    api_token,
+    splunk_hec_token=None,
+    splunk_host=None,
+    splunk_index=None,
+    sentinel_customer_id=None,
+    sentinel_shared_key=None,
+    sentinel_log_type=None,
 ):
     log_data_dict = json.loads(json_log_str)
     # is a json array
     print("processing", len(log_data_dict), "logs")
     start_time = time.time()
     ### BATCHING
-    # This section demonstrates how to batch log data to meet a maximum byte size 
+    # This section demonstrates how to batch log data to meet a maximum byte size
     # that can be handled by the API.
     # we can only send 6291456 bytes at a time due to an aws lambda limitation
     # we need to find a batch size roughly equivalent to 6291456 bytes
@@ -34,12 +41,12 @@ def send_logs_to_cwolves(
     for log in log_data_dict_sample:
         bytes_per_line += len(json.dumps(log).encode("utf-8"))
     bytes_per_line = bytes_per_line // len(log_data_dict_sample)
-    
+
     # the batch size is the number of batches required
     # to send the log data in batches of about 5MB
     # 35MB of data will be sent in 7 batches
     batch_size = 5000000 // bytes_per_line
-    
+
     # round down to nearest 1000 log lines
     batch_size = batch_size // 1000 * 1000
 
@@ -50,7 +57,7 @@ def send_logs_to_cwolves(
     ### SENDING LOGS
     # Pass in the splunk host, splunk hec token, Copper api token, and log data
     # as a json array of log lines
-    # 
+    #
     responses = []
     # iterate through the log data in batches of 1000 log lines
     for i in range(0, len(log_data_dict), batch_size):
@@ -58,16 +65,22 @@ def send_logs_to_cwolves(
         # json array of log lines
         log_data = json.dumps(log_data)
         try:
-            url = "https://zof5dm3d636vqsqssv65rhs5f40qhsde.lambda-url.us-west-2.on.aws/"
+            url = (
+                "https://zof5dm3d636vqsqssv65rhs5f40qhsde.lambda-url.us-west-2.on.aws/"
+            )
             response = requests.post(
                 url,
                 json={
-                    "splunk_host": splunk_host,
-                    "splunk_hec_token": splunk_hec_token,
                     "log_data": log_data,
                     "api_token": api_token,
                     # optional, pass in desired index for Splunk HEC
-                    "splunk_index": splunk_index, 
+                    "splunk_host": splunk_host,
+                    "splunk_hec_token": splunk_hec_token,
+                    "splunk_index": splunk_index,
+                    # optional, pass in desired log type for MSFT Sentinel
+                    "sentinel_customer_id": sentinel_customer_id,
+                    "sentinel_shared_key": sentinel_shared_key,
+                    "sentinel_log_type": sentinel_log_type,
                 },
                 # hack to not wait for response
                 # timeout=0.0000000001,
@@ -97,13 +110,27 @@ if __name__ == "__main__":
         # string of json data to be passed to function
         log_data = f.read()
 
-    # PASS IN YOUR OWN SPLUNK PARAMETERS
-    splunk_hec_token = "220f4d97-ccc7-4f2f-89a3-5e31f171b907"
-    splunk_host = "prd-p-91czz"  # TODO: change this
+    # OPTIONAL (SPLUNK): pass parameters to forward to splunk HEC
+    # splunk_hec_token = "220f4d97-ccc7-4f2f-89a3-5e31f171b907"
+    # splunk_host = "prd-p-91czz"
+    # splunk_index = "main"
+    # OPTIONAL (SENTINEL): pass parameters to forward to MSFT sentinel
+    # sentinel_customer_id = ""
+    # sentinel_shared_key = ""
+    # sentinel_log_type
+
+    # GET AN API TOKEN FROM https://cwolves.com/dashboard/api-tokens/
     api_token = "cw_GLAS2qMNhtRSGQDfeHw4695NO63f7VDq"
 
     responses = send_logs_to_cwolves(
-        log_data, splunk_hec_token, splunk_host, api_token, splunk_index="copper-demo"
+        log_data,  # required
+        api_token,  # optional
+        # splunk_hec_token, # optional
+        # splunk_host, # optional
+        # splunk_index="copper-demo", # optional
+        # sentinel_customer_id=sentinel_customer_id, # optional
+        # sentinel_shared_key=sentinel_shared_key, # optional
+        # sentinel_log_type=sentinel_log_type, # optional
     )
 
     # aggregate all of the json responses and save as a json file

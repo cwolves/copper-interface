@@ -67,7 +67,7 @@ if __name__ == "__main__":
         log_data = f.read()
     # send logs to splunk
     splunk_hec_token = "220f4d97-ccc7-4f2f-89a3-5e31f171b907"
-    splunk_host = "prd-p-91czz"  # TODO: change this
+    splunk_host = "prd-p-91czz"
     res = send_logs(
         log_data,
         splunk_host,
