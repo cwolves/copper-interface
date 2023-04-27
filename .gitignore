@@ -10,3 +10,8 @@ cdk.out
 .venv*
 *.mp4
 example_logs_big.json
+
+# terraform stuff
+.terraform*
+terraform.tfstate
+terraform.tfstate.backup

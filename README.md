@@ -2,13 +2,20 @@
 
 This repository contains infrastructure as code to quickly get started with the Copper API.
 
-For support, reach out to thatcher@cwolves.com.
+In short, to use our API:
+
+1. Gather your JSON Log data (we're working on other formats)
+2. Send it to our API ('https://api.cwolves.com/api/v1/')
+
+For any questions, reach out to thatcher@cwolves.com. I respond quickly!
 
 ## Copper API
 
-The Copper API sits between your log producers and your SIEM. It doesn't matter where these producers exist as long as they can send their JSON log data to the Copper API.
+The Copper API sits between your log producers and your SIEM. It doesn't matter where these producers exist as long as they can send their JSON log data to the Copper API over the internet.  
 
-One way to facilitate this process is to push all of your logs to a bucket and use a Lambda to forward them to the Copper API. This repository is allows you to instantly set up the AWS resources via their CDK for this pattern.
+NOTE: We are **actively** developing capability to accept XML data.
+
+One way to use our API is to push all of your logs to a bucket and use a Lambda to forward them to the Copper API. Our API will return the slashed data to you and  This repository is allows you to instantly set up the AWS resources via their CDK for this pattern.
 
 Additionally, this repository contains an example Python script that shows how to send logs to the Copper API directly.
 
@@ -65,7 +72,7 @@ Use the example Python script `send_logs.py` to send logs to our api. You will n
 
     `cdk destroy`
 
-## Resources
+## CDK Resources
 
 This stack creates resources that will enable you to drop logs into a bucket, and have the slashed version sent to Splunk.
 
