@@ -8,21 +8,21 @@ provider "aws" {
   region = "us-west-2" # Replace with your desired region
 }
 
-# Set up the environment variables for the Lambda function
+# The copper_receiver_url is essentially the url of the API
 locals {
   forwarder_environment = {
     copper_receiver_url = "https://zof5dm3d636vqsqssv65rhs5f40qhsde.lambda-url.us-west-2.on.aws/"
   }
 }
 
-# SSM PARAM DESCRIPTIONS
+# SSM parameter descriptions
 locals {
   splunk_host      = "The host name of the splunk instance. e.g. prd-p-foxn4"
   splunk_hec_token = "The token used to send logs to splunk. e.g. 1234-5678-9012-3456"
   copper_api_token = "The token from cwolves.com to give access to the Copper API"
 }
 
-#
+# SSM parameters 1
 resource "aws_ssm_parameter" "splunk_host" {
   name        = "/copper/forwarder/splunk_host"
   description = "The host name of the splunk instance. e.g. prd-p-foxn4"
@@ -31,6 +31,7 @@ resource "aws_ssm_parameter" "splunk_host" {
   overwrite = true
 }
 
+# SSM parameters 2
 resource "aws_ssm_parameter" "splunk_hec_token" {
   name        = "/copper/forwarder/splunk_hec_token"
   description = "The token used to send logs to splunk. e.g. 1234-5678-9012-3456"
@@ -39,6 +40,7 @@ resource "aws_ssm_parameter" "splunk_hec_token" {
   overwrite = true
 }
 
+# SSM parameters 3
 resource "aws_ssm_parameter" "copper_api_token" {
   name        = "/copper/forwarder/copper_api_token"
   description = "The token from cwolves.com to give access to the Copper API"
@@ -67,16 +69,17 @@ resource "aws_iam_policy" "lambda_basic_execution" {
   })
 }
 
-# Create lambda execution role
+# Create lambda execution role that has the policy above
 resource "aws_iam_role" "lambda_execution" {
-  name = "lambda_execution"
-
+  name = "lambda-execution"
+  path = "/"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Action = "sts:AssumeRole"
         Effect = "Allow"
+        Sid    = ""
         Principal = {
           Service = "lambda.amazonaws.com"
         }

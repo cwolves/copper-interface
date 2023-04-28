@@ -21,6 +21,10 @@ One way to use our API is to push all of your logs to a bucket and use a Lambda 
 
 Additionally, this repository contains an example Python script that shows how to send logs to the Copper API directly.
 
+Here is an example of the 
+
+
+
 ## Quickest Start (Python Script)
 
 Use the example Python script `send_logs.py` to send logs to our api. You will need to update the `splunk_host`, `splunk_hec_token`, and `api_token` variables with your own values.
