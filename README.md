@@ -1,5 +1,3 @@
-<https://cwolves.com>
-
 # Copper Interface
 
 This repository contains infrastructure as code to quickly get started with the Copper API.
@@ -9,7 +7,7 @@ In short, to use our API:
 1. Gather your JSON Log data (we're working on other formats)
 2. Send it to our API ('https://api.cwolves.com/api/v1/')
 
-For any questions, reach out to thatcher@cwolves.com. I respond quickly!
+For any questions, feature requests, or suggestions reach out to thatcher@cwolves.com. I respond quickly!
 
 ## Copper API
 

@@ -87,7 +87,7 @@ resource "aws_iam_role" "lambda_execution" {
 
 # Create the Lambda function
 resource "aws_lambda_function" "log_forwarder" {
-  function_name = "copper-log-bucket-forwarder"
+  function_name = "copper-log-bucket-forwarder-2"
   handler       = "send.lambda_handler"
   filename      = "lambda_forwarder.zip"
   role          = aws_iam_role.lambda_execution.arn
@@ -109,7 +109,7 @@ resource "aws_lambda_function" "log_forwarder" {
 
 # bucket to put logs
 resource "aws_s3_bucket" "bucket_logs" {
-  bucket = "copper-logs-destination"
+  bucket = "copper-logs-destination-2"
 }
 
 resource "aws_s3_bucket_notification" "bucket_logs_notification" {
@@ -131,38 +131,38 @@ resource "aws_lambda_permission" "log_forwarder_s3_read_permission" {
   source_arn    = aws_s3_bucket.bucket_logs.arn
 }
 
-resource "aws_s3_bucket_policy" "bucket_logs_policy" {
-  bucket = aws_s3_bucket.bucket_logs.id
+# resource "aws_s3_bucket_policy" "bucket_logs_policy" {
+#   bucket = aws_s3_bucket.bucket_logs.id
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "AllowLambdaFunctionToReadObjects"
-        Effect = "Allow"
-        Principal = {
-          AWS = "*"
-        }
-        Action = [
-          "s3:GetObject",
-          "s3:GetObjectVersion",
-        ]
-        Resource = "${aws_s3_bucket.bucket_logs.arn}/*"
-      },
-      {
-        Sid    = "AllowLambdaFunctionToDeleteObjects"
-        Effect = "Allow"
-        Principal = {
-          AWS = "*"
-        }
-        Action = [
-          "s3:DeleteObject",
-        ]
-        Resource = "${aws_s3_bucket.bucket_logs.arn}/*"
-      }
-    ]
-  })
-}
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Sid    = "AllowLambdaFunctionToReadObjects"
+#         Effect = "Allow"
+#         Principal = {
+#           AWS = "*"
+#         }
+#         Action = [
+#           "s3:GetObject",
+#           "s3:GetObjectVersion",
+#         ]
+#         Resource = "${aws_s3_bucket.bucket_logs.arn}/*"
+#       },
+#       {
+#         Sid    = "AllowLambdaFunctionToDeleteObjects"
+#         Effect = "Allow"
+#         Principal = {
+#           AWS = "*"
+#         }
+#         Action = [
+#           "s3:DeleteObject",
+#         ]
+#         Resource = "${aws_s3_bucket.bucket_logs.arn}/*"
+#       }
+#     ]
+#   })
+# }
 
 
 # policy to grant lambda permission to read from SSM
@@ -181,7 +181,7 @@ resource "aws_iam_policy" "lambda_ssm_policy" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_ssm_policy_attachment" {
-  policy_arn = aws_iam_policy.lambda_ssm_policy.arn
-  role       = aws_lambda_function.log_forwarder.role
-}
+# resource "aws_iam_role_policy_attachment" "lambda_ssm_policy_attachment" {
+#   policy_arn = aws_iam_policy.lambda_ssm_policy.arn
+#   role       = aws_lambda_function.log_forwarder.role
+# }
