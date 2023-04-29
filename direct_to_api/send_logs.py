@@ -3,7 +3,7 @@ import requests
 import json
 
 
-def send_logs_to_copper(
+def send_logs_to_cwolves(
     json_log_str,
     api_token,
     splunk_hec_token=None,
@@ -110,18 +110,27 @@ if __name__ == "__main__":
         # string of json data to be passed to function
         log_data = f.read()
 
-    responses = send_logs_to_copper(
-        log_data,  # string of json data (array of dictionaries)
-        # GET AN API TOKEN FROM https://cwolves.com/dashboard/api-tokens/
-        api_token="cw_GLAS2qMNhtRSGQDfeHw4695NO63f7VDq",
-        # OPTIONAL (SPLUNK): pass parameters to forward to splunk HEC
-        # splunk_hec_token = "220f4d97-ccc7-4f2f-89a3-5e31f171b907",
-        # splunk_host = "prd-p-91czz",
-        # splunk_index = "main",
-        # OPTIONAL (SENTINEL): pass parameters to forward to MSFT sentinel
-        sentinel_customer_id="6bf5a2a8-3dc7-4810-bc58-db5dfbbbd45a",
-        sentinel_shared_key="Z3yZSWCTzaenW3dB+RdBQOJQ/qHWiQzNPxiNqby3DmXcXhTyP25FkGSj6aI4J6f8IGIuzf0gCr0OZoIfDaPbaQ==",
-        sentinel_log_type="WebMonitorTest",
+    # OPTIONAL (SPLUNK): pass parameters to forward to splunk HEC
+    # splunk_hec_token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    # splunk_host = "prd-x-xxxxx"
+    # splunk_index = "main"
+    # OPTIONAL (SENTINEL): pass parameters to forward to MSFT sentinel
+    # sentinel_customer_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    # sentinel_shared_key = "xxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=="
+    # sentinel_log_type = "WebMonitorTest"
+
+    # GET AN API TOKEN FROM https://cwolves.com/dashboard/api-tokens/
+    api_token = "cw_xxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+    responses = send_logs_to_cwolves(
+        log_data,  # required
+        api_token,  # optional
+        # splunk_hec_token=splunk_hec_token, # optional
+        # splunk_host=splunk_host, # optional
+        # splunk_index=splunk_index, # optional
+        # sentinel_customer_id=sentinel_customer_id, # optional
+        # sentinel_shared_key=sentinel_shared_key, # optional
+        # sentinel_log_type=sentinel_log_type, # optional
     )
 
     # aggregate all of the json responses and save as a json file
