@@ -1,3 +1,19 @@
+# This script demonstrates how to send logs to Copper's API
+# At the bottom of the script, if __name__ == "__main__" you can pass in variables to send logs to Splunk HEC or MSFT Sentinel
+#
+# If you want to try out the API:
+# 1. get an API token from https://cwolves.com/dashboard/api-tokens/
+# if you want to try before you buy, contact us for a free token: thatchers@cwolves.com
+# 2. Replace the api_token variable below with your API token
+# 3. Run python send_logs.py within this directory
+# This will send the example_logs.json file to Copper's API
+# It will write the response to direct_to_api/log_data/responses.json
+#
+# You can use your own log data by replacing the example_logs.json file with your own data
+
+
+
+
 import time
 import requests
 import json

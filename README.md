@@ -1,25 +1,27 @@
 # Copper Interface
 
-This repository contains infrastructure as code to quickly get started with the Copper API.
+This repository contains infrastructure as code, and examples to quickly get started with the Copper API.
 
-In short, to use our API:
+In summary, to use our API:
 
-1. Gather your JSON Log data (we're working on other formats)
+1. Gather your JSON Log data, Windows Event Log data, or XML data.
 2. Send it to our AWS Lambda based API ('https://zof5dm3d636vqsqssv65rhs5f40qhsde.lambda-url.us-west-2.on.aws/')
+
+Below, you will find documentation on how to use our API. You can:
+
+1. Use our API directly by sending a POST request to our API. ([API Specification](#api-specification)) ([Example Python Script](#quick-start-with-python))
+2. Use the AWS CDK to quickly create a stack in your AWS account. This will create a bucket in AWS that will forward file data to our API. ([AWS CDK](#quick-start-using-aws-cdk))
+3. Use Terraform to quickly create a stack in your AWS account. This will create a bucket in AWS that will forward file data to our API. ([Terraform](#quick-start-using-terraform))
 
 For any questions, feature requests, or suggestions reach out to thatcher@cwolves.com. I respond quickly!
 
 ## Copper API
 
-The Copper API sits between your log producers and your SIEM. It doesn't matter where these producers exist as long as they can send their JSON log data to the Copper API over the internet.
-
-NOTE: We are **actively** developing capability to accept XML data.
-
-One way to use our API is to push all of your logs to a bucket and use a Lambda to forward them to the Copper API. Our API will return the slashed data to you and This repository is allows you to instantly set up the AWS resources via their CDK for this pattern.
-
-Additionally, this repository contains an example Python script that shows how to send logs to the Copper API directly.
+The Copper API sits between your log producers and your SIEM. It doesn't matter where these producers exist as long as they can send their JSON, XML, or Windows Event log data to the Copper API over the internet.
 
 ## API Specification
+
+You can send logs to our API via a POST request. The request body should be a JSON object with the following fields:
 
 Endpoint: <https://zof5dm3d636vqsqssv65rhs5f40qhsde.lambda-url.us-west-2.on.aws/>
 
@@ -27,16 +29,18 @@ Method: POST
 
 Request Body:
 
-| Name                 | Type   | Required | Description                                                  |
-| -------------------- | ------ | -------- | ------------------------------------------------------------ |
-| json_log_str         | string | Yes      | A string representation of a JSON array of log data.         |
-| api_token            | string | Yes      | An API token from <https://cwolves.com/dashboard/api-tokens/>. |
-| splunk_hec_token     | string | No       | A token for Splunk HEC.                                      |
-| splunk_host          | string | No       | The Splunk host. e.g.                                        |
-| splunk_index         | string | No       | The desired index for Splunk HEC.                            |
-| sentinel_customer_id | string | No       | The customer ID for Microsoft Sentinel.                      |
-| sentinel_shared_key  | string | No       | The shared key for Microsoft Sentinel.                       |
-| sentinel_log_type    | string | No       | The desired log type for Microsoft Sentinel.                 |
+| Name                 | Type   | Required | Description                                                                                                                                           |
+| -------------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| json_log_str         | array  | Yes      | A JSON array of strings. Each item can be either JSON or XML format. If you have Windows Event Logs, each event should be a string item in the array. |
+| api_token            | string | Yes      | A Cwolves API token, visit <https://cwolves.com/dashboard/api-tokens/>.                                                                               |
+| splunk_hec_token     | string | No       | A token for Splunk HEC.                                                                                                                               |
+| splunk_host          | string | No       | The Splunk host. e.g.                                                                                                                                 |
+| splunk_index         | string | No       | The desired index for Splunk HEC.                                                                                                                     |
+| sentinel_customer_id | string | No       | The customer ID for Microsoft Sentinel.                                                                                                               |
+| sentinel_shared_key  | string | No       | The shared key for Microsoft Sentinel.                                                                                                                |
+| sentinel_log_type    | string | No       | The desired log type for Microsoft Sentinel.                                                                                                          |
+
+Note: Splunk and Sentinel fields are optional. If you do not provide them, the API will not send data to Splunk or Sentinel. The slashed data will be returned in the response body. If you'd like to use splunk or sentinel, use all of the fields for that service.
 
 Response Body:
 
@@ -46,74 +50,117 @@ Response Body:
 | sentinel | object | Metadata regarding data sent to Microsoft Sentinel. |
 | splunk   | object | Metadata regarding data sent to Splunk.             |
 
-Example Request:
+Example Requests:
 
 ```json
 {
-  "json_log_str": "[{\"log\": \"log1\"}, {\"log\": \"log2\"}]",
+  "json_log_str": "[{\"log\": \"logdata1\"}, {\"log\": \"logdata2\"}]",
+  "api_token": "cw"
+}
+```
+
+```json
+{
+  "json_log_str": "[{\"log\": \"logdata1\"}, {\"log\": \"logdata2\"}]",
   "api_token": "cw",
   "splunk_hec_token": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "splunk_host": "prd-x-xxxxx",
-  "splunk_index": "main",
+  "splunk_index": "main"
+}
+```
+
+```json
+{
+  "json_log_str": "[{\"log\": \"logdata1\"}, {\"log\": \"logdata2\"}]",
+  "api_token": "cw",
   "sentinel_customer_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "sentinel_shared_key": "xxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx==",
   "sentinel_log_type": "WebMonitorTest"
 }
 ```
 
-## Quickest Start (Python Script)
+Here is an example request with python:
 
-Use the example Python script `direct_to_api/send_logs.py` to send logs to our API.
+```python
+url = "https://zof5dm3d636vqsqssv65rhs5f40qhsde.lambda-url.us-west-2.on.aws/"
+response = requests.post(
+      url,
+      json={
+         "log_data": "[{\"log\": \"logdata1\"}, {\"log\": \"logdata2\"}]"
+         "api_token": 'cw-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+         # optional, pass in desired index for Splunk HEC
+         "splunk_host": 'prd-x-xxxxx',
+         "splunk_hec_token": 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+         "splunk_index": 'main',
+         # optional, pass in desired log type for MSFT Sentinel
+         "sentinel_customer_id": 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+         "sentinel_shared_key": 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx==',
+         "sentinel_log_type": 'WebMonitorTest'
+      },
+)
+```
 
-## Quick Start (Terraform)
+## Quick Start with Python
+
+You can look at our example Python script `direct_to_api/send_logs.py`. It shows you how to batch JSON data into 6mb chunks and send it to our API. You will need an API token from <https://cwolves.com/dashboard/api-tokens/> to use this script.
+
+## Quick Start using Terraform
 
 We've just added this, please let us know if you have any issues.
 
 ### Prerequisites
 
+You should be comfortable working with Terraform.
+
 - Terraform [Install](https://learn.hashicorp.com/tutorials/terraform/install-cli)
 - AWS Account [Sign Up](https://aws.amazon.com/)
 - Splunk HEC Endpoint [Guide](https://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector)
 
-0. Prerequisites  
-    [Sign Up](https://cwolves.com) for a Cwolves Account
+0. Prerequisites
+   [Sign Up](https://cwolves.com) for a Cwolves Account
 1. Clone this repository onto your local machine.
 
-    `git clone git@github.com:arctype-dev/copper-interface.git`
+   `git clone git@github.com:arctype-dev/copper-interface.git`
 
 2. Change into the directory.
 
-    `cd copper-interface/terraform`
+   `cd copper-interface/terraform`
 
 3. Initialize Terraform. This creates a stack with the resources required to deploy a stack via Terraform. You can see the stack in CloudFormation.
 
-    `terraform init`
+   `terraform init`
 
 4. Deploy the stack. This creates the resources in your AWS account. You can see the stack in CloudFormation.
 
-    `terraform apply`
+   `terraform apply`
 
-## Quick Start (AWS CDK)
+## Quick Start using AWS CDK
 
-You can use our infrastructure as code with the AWS CDK to quickly create a stack in your AWS account. At the end you'll have a bucket which, when json files are dropped into it, will send logs to our API.
+You can use our infrastructure as code with the AWS CDK to quickly create a Cloud Formation Stack in your AWS account. At the end you'll have some AWS [resources](#cdk-resources), most importantly a bucket. when json files are dropped into it, file data will be forwarded to our API.
+
+Note: We have not updated the CDK to work with Sentinel yet.
 
 ### Prerequisites
+
+You should be comfortable using the AWS CLI, CDK, and Python.
 
 - npm, Node.js [Install](https://nodejs.org/en/download/)
 - Python [Install](https://www.python.org/downloads/)
 - AWS Account [Sign Up](https://aws.amazon.com/)
 - AWS CLI Access [Instructions](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
 - AWS CDK [Guide](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html)
-- Splunk HEC Endpoint [Guide](https://docs.splunk.com/Documentation/Splunk/latest/Data/UsetheHTTPEventCollector)
+- Splunk HEC Endpoint [Guide](https://docs.splunk.com/Documentation/Splunk/9.0.4/Data/UsetheHTTPEventCollector)
 
-0. Prerequisites  
-   Install Libraries  
-   `npm i -g aws-cdk`  
-   `pip install -r requirements.txt`  
-   [Sign Up](https://cwolves.com) for a Cwolves Account
-1. Clone this repository onto your local machine.
+0. Clone this repository onto your local machine.
 
    `git clone git@github.com:arctype-dev/copper-interface.git`
+
+1. Prerequisites
+   Install Libraries  
+   `npm i -g aws-cdk` (Command line tool to use the AWS CDK)  
+   `pip install -r aws_cdk/requirements.txt`  
+   [Sign Up](https://cwolves.com) for a Cwolves Account  
+   Get an API Token from <https://cwolves.com/dashboard/api-tokens/>
 
 2. Change into the directory.
 
