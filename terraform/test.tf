@@ -22,73 +22,41 @@ locals {
   copper_api_token = "The token from cwolves.com to give access to the Copper API"
 }
 
-# SSM parameters 1
+# SSM parameters 1/3
 resource "aws_ssm_parameter" "splunk_host" {
   name        = "/copper/forwarder/splunk_host"
   description = "The host name of the splunk instance. e.g. prd-p-foxn4"
   type        = "String"
   value       = "PLACEHOLDER_VALUE"
-  overwrite = true
+  overwrite   = true
 }
 
-# SSM parameters 2
+# SSM parameters 2/3
 resource "aws_ssm_parameter" "splunk_hec_token" {
   name        = "/copper/forwarder/splunk_hec_token"
   description = "The token used to send logs to splunk. e.g. 1234-5678-9012-3456"
   type        = "SecureString"
   value       = "PLACEHOLDER_VALUE"
-  overwrite = true
+  overwrite   = true
 }
 
-# SSM parameters 3
+# SSM parameters 3/3
 resource "aws_ssm_parameter" "copper_api_token" {
   name        = "/copper/forwarder/copper_api_token"
   description = "The token from cwolves.com to give access to the Copper API"
   type        = "SecureString"
   value       = "PLACEHOLDER_VALUE"
-  overwrite = true
+  overwrite   = true
 }
 
-# Lambda can log events with this policy
-resource "aws_iam_policy" "lambda_basic_execution" {
-  name = "lambda-basic-execution"
-  path = "/"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ]
-        Effect   = "Allow"
-        Resource = "*"
-      }
-    ]
-  })
+# bucket to put logs
+# TODO: change name or remove if you are bringing your own bucket
+resource "aws_s3_bucket" "logs_bucket" {
+  bucket = "FILL_BUCKET_NAME"
 }
 
-# Create lambda execution role that has the policy above
-resource "aws_iam_role" "lambda_execution" {
-  name = "lambda-execution"
-  path = "/"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Sid    = ""
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
-      }
-    ]
-  })
-}
-
-# Create the Lambda function
+# This lambda function pulls downloads logs from a bucket and forwards them to the Copper API.
+# It is triggered by Create Events on the bucket.
 resource "aws_lambda_function" "log_forwarder" {
   function_name = "copper-log-bucket-forwarder-2"
   handler       = "send.lambda_handler"
@@ -99,22 +67,22 @@ resource "aws_lambda_function" "log_forwarder" {
   timeout       = 300 # 5 minutes
 
   # Set up the environment variables
+  # TODO: replace the bucket name if you are bringing your own bucket
   environment {
     variables = {
       copper_receiver_url = "https://zof5dm3d636vqsqssv65rhs5f40qhsde.lambda-url.us-west-2.on.aws/",
       splunk_host         = "/copper/forwarder/splunk_host",
       splunk_hec_token    = "/copper/forwarder/splunk_hec_token",
       copper_api_token    = "/copper/forwarder/copper_api_token",
+      bucket_name         = "FILL_BUCKET_NAME",
     }
   }
 }
 
 
-# bucket to put logs
-resource "aws_s3_bucket" "bucket_logs" {
-  bucket = "copper-logs-destination-2"
-}
 
+
+# this notfiication triggers the lambda function when a file is created in the bucket
 resource "aws_s3_bucket_notification" "bucket_logs_notification" {
   bucket = aws_s3_bucket.bucket_logs.id
 
@@ -124,67 +92,3 @@ resource "aws_s3_bucket_notification" "bucket_logs_notification" {
   }
 }
 
-# policy to grant lambda permission to read from bucket
-
-resource "aws_lambda_permission" "log_forwarder_s3_read_permission" {
-  statement_id  = "AllowExecutionFromS3Bucket"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.log_forwarder.function_name
-  principal     = "s3.amazonaws.com"
-  source_arn    = aws_s3_bucket.bucket_logs.arn
-}
-
-# resource "aws_s3_bucket_policy" "bucket_logs_policy" {
-#   bucket = aws_s3_bucket.bucket_logs.id
-
-#   policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [
-#       {
-#         Sid    = "AllowLambdaFunctionToReadObjects"
-#         Effect = "Allow"
-#         Principal = {
-#           AWS = "*"
-#         }
-#         Action = [
-#           "s3:GetObject",
-#           "s3:GetObjectVersion",
-#         ]
-#         Resource = "${aws_s3_bucket.bucket_logs.arn}/*"
-#       },
-#       {
-#         Sid    = "AllowLambdaFunctionToDeleteObjects"
-#         Effect = "Allow"
-#         Principal = {
-#           AWS = "*"
-#         }
-#         Action = [
-#           "s3:DeleteObject",
-#         ]
-#         Resource = "${aws_s3_bucket.bucket_logs.arn}/*"
-#       }
-#     ]
-#   })
-# }
-
-
-# policy to grant lambda permission to read from SSM
-resource "aws_iam_policy" "lambda_ssm_policy" {
-  name_prefix = "lambda-ssm-policy-"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid      = "AllowLambdaToAccessParameterStoreFolder"
-        Effect   = "Allow"
-        Action   = ["ssm:GetParametersByPath", "ssm:GetParameter"]
-        Resource = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/copper/forwarder/*"
-      }
-    ]
-  })
-}
-
-# resource "aws_iam_role_policy_attachment" "lambda_ssm_policy_attachment" {
-#   policy_arn = aws_iam_policy.lambda_ssm_policy.arn
-#   role       = aws_lambda_function.log_forwarder.role
-# }
