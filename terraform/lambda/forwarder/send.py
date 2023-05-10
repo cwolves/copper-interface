@@ -5,7 +5,7 @@ import os
 
 
 def lambda_handler(event, context):
-    print('triggered', event)
+    print("triggered", event)
     for record in event["Records"]:
         bucket_name = record["s3"]["bucket"]["name"]
         object_key = record["s3"]["object"]["key"]
@@ -17,6 +17,7 @@ def lambda_handler(event, context):
         service_name="s3",
     )
     bucket = s3.Bucket(bucket_name)
+
     # read in log data
     log_data = bucket.Object(object_key).get()["Body"].read().decode("utf-8")
 
@@ -35,20 +36,7 @@ def lambda_handler(event, context):
         copper_api_token = param_store.get_parameter(
             Name=os.environ["copper_api_token_path"], WithDecryption=False
         )
-
         copper_api_token = copper_api_token["Parameter"]["Value"]
-
-        print(
-            "got host",
-            splunk_host,
-            "got token",
-            splunk_hec_token,
-            "got api token",
-            copper_api_token,
-        )
-
-        # TODO: safeguard when they forget to update parameter store value
-        # write_error(bucket, "Please update the parameter store values for splunk_host and splunk_hec_token")
 
         # send a request to the lambda function
         lambda_fn_url = os.environ["copper_receiver_url"]
@@ -94,9 +82,6 @@ def lambda_handler(event, context):
                 # hack to not wait for response
                 except requests.exceptions.ConnectTimeout:
                     pass
-        # TODO: consider moving the file somewhere
-        # delete the file from the bucket
-        bucket.Object(object_key).delete()
 
         print("All done!")
 

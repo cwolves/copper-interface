@@ -1,18 +1,18 @@
-# PROVIDE AWS_REGION
-data "aws_region" "current" {}
 
-# PROVIDE AWS_ACCOUNT_ID
-data "aws_caller_identity" "current" {}
+
+
 
 provider "aws" {
   region = "us-west-2" # Replace with your desired region
 }
 
-# The copper_receiver_url is essentially the url of the API
+# replace this with the name of the bucket you want to create
+# if you have a bucket you want to use already:
+# 1. replace with the name of your bucket
+# 2. remove the aws_s3_bucket resource below
+# 3. add your bucket id to the aws_s3_bucket_notification resource (at the bottom)
 locals {
-  forwarder_environment = {
-    copper_receiver_url = "https://zof5dm3d636vqsqssv65rhs5f40qhsde.lambda-url.us-west-2.on.aws/"
-  }
+  bucket_name = "log-bucket-for-copper-2"
 }
 
 # SSM parameter descriptions
@@ -52,7 +52,59 @@ resource "aws_ssm_parameter" "copper_api_token" {
 # bucket to put logs
 # TODO: change name or remove if you are bringing your own bucket
 resource "aws_s3_bucket" "logs_bucket" {
-  bucket = "FILL_BUCKET_NAME"
+  bucket = local.bucket_name
+}
+
+# role for lambda
+resource "aws_iam_role" "lambda_execution" {
+  name = "lambda_execution_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# policy to read from bucket
+resource "aws_iam_policy" "lambda_permissions" {
+  name = "lambda_permissions_policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "s3:GetObject",
+          "s3:ListBucket"
+        ]
+        Effect = "Allow"
+        Resource = [
+          "arn:aws:s3:::${local.bucket_name}}",
+          "arn:aws:s3:::${local.bucket_name}/*"
+        ]
+      },
+      {
+        Action = [
+          "ssm:GetParameter"
+        ]
+        Effect   = "Allow"
+        Resource = "arn:aws:ssm:*:*:parameter/copper/*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_execution_permissions" {
+  policy_arn = aws_iam_policy.lambda_permissions.arn
+  role       = aws_iam_role.lambda_execution.name
 }
 
 # This lambda function pulls downloads logs from a bucket and forwards them to the Copper API.
@@ -62,12 +114,10 @@ resource "aws_lambda_function" "log_forwarder" {
   handler       = "send.lambda_handler"
   filename      = "lambda_forwarder.zip"
   role          = aws_iam_role.lambda_execution.arn
-  runtime       = "python3.9"
-  memory_size   = 1024
-  timeout       = 300 # 5 minutes
+  runtime     = "python3.9"
+  memory_size = 1024
+  timeout     = 300 # 5 minutes
 
-  # Set up the environment variables
-  # TODO: replace the bucket name if you are bringing your own bucket
   environment {
     variables = {
       copper_receiver_url   = "https://zof5dm3d636vqsqssv65rhs5f40qhsde.lambda-url.us-west-2.on.aws/",
@@ -81,9 +131,9 @@ resource "aws_lambda_function" "log_forwarder" {
 
 
 
-# this notfiication triggers the lambda function when a file is created in the bucket
-resource "aws_s3_bucket_notification" "bucket_logs_notification" {
-  bucket = aws_s3_bucket.bucket_logs.id
+# this notification triggers the lambda function when a file is created in the bucket
+resource "aws_s3_bucket_notification" "logs_bucket_notification" {
+  bucket = aws_s3_bucket.logs_bucket.id
 
   lambda_function {
     lambda_function_arn = aws_lambda_function.log_forwarder.arn

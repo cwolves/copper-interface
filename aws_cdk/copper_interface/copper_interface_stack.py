@@ -48,7 +48,7 @@ class CopperInterfaceStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             handler="send.lambda_handler",
             code=_lambda.Code.from_asset(
-                "copper_interface/lambdas/forwarder",
+                "copper_interface/lambda/forwarder",
                 bundling={
                     "image": _lambda.Runtime.PYTHON_3_9.bundling_image,
                     "command": [

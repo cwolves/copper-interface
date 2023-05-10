@@ -25,30 +25,35 @@ Note: You might already have a bucket aggregating logs. Replace the variable `FI
    [Sign Up](https://cwolves.com) for a Cwolves Account
 1. Clone this repository onto your local machine.
 
-   `git clone git@github.com:arctype-dev/copper-interface.git`
+   `git clone git@github.com:arctype-dev/copper-interface.git && cd copper-interface`
 
 2. Change into the directory.
 
-   `cd copper-interface/terraform`
+   `cd terraform`
 
-3. Initialize Terraform. This creates a stack with the resources required to deploy a stack via Terraform. You can see the stack in CloudFormation.
+3. Initialize Terraform.
 
    `terraform init`
 
-4. Deploy the stack. This creates the resources in your AWS account. You can see the stack in CloudFormation.
+4. Deploy the resources.
 
    `terraform apply`
 
 5. Create SSM Parameters
 
+   ![SSM Parameters](../readme_img/aws_parameter_store.png)
+
+   Edit each parameter and update the values.
+
+   ![SSM Parameter Values](../readme_img/set_splunk_param.png)
 
 ## Resources
 
-This stack creates resources that will enable you to drop logs into a bucket, and have the slashed version sent to Splunk.
+These are the resources managed by the Terraform script.
 
 ### Log Bucket
 
-The stack includes a single bucket to drop logs into. Simply upload a file with you logs in the json format. This bucket is NOT for long term storage, the files are deleted once they are processed by the forwarder lambda.
+The stack includes a single bucket to drop logs into. Simply upload a file with you logs in the JSON or XML format.
 
 #### Lambda Event Notification
 
