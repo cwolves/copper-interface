@@ -2,10 +2,10 @@ import zipfile
 import os
 
 # Path to your Python code directory
-code_dir = "../cdk/lambdas/forwarder/"
+code_dir = "./lambda/forwarder/"
 
 # Path to the directory where you installed the libraries using `pip install -t`
-libs_dir = "../cdk/lambdas/forwarder/libs"
+libs_dir = "./lambda/forwarder_libs"
 
 # Name of the ZIP archive to create
 zip_file = "lambda_forwarder.zip"
