@@ -70,11 +70,10 @@ resource "aws_lambda_function" "log_forwarder" {
   # TODO: replace the bucket name if you are bringing your own bucket
   environment {
     variables = {
-      copper_receiver_url = "https://zof5dm3d636vqsqssv65rhs5f40qhsde.lambda-url.us-west-2.on.aws/",
-      splunk_host         = "/copper/forwarder/splunk_host",
-      splunk_hec_token    = "/copper/forwarder/splunk_hec_token",
-      copper_api_token    = "/copper/forwarder/copper_api_token",
-      bucket_name         = "FILL_BUCKET_NAME",
+      copper_receiver_url   = "https://zof5dm3d636vqsqssv65rhs5f40qhsde.lambda-url.us-west-2.on.aws/",
+      splunk_host_path      = "/copper/forwarder/splunk_host",
+      splunk_hec_token_path = "/copper/forwarder/splunk_hec_token",
+      copper_api_token_path = "/copper/forwarder/copper_api_token",
     }
   }
 }

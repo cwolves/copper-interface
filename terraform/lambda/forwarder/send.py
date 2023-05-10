@@ -5,12 +5,14 @@ import os
 
 
 def lambda_handler(event, context):
+    print('triggered', eventx)
     for record in event["Records"]:
         bucket_name = record["s3"]["bucket"]["name"]
         object_key = record["s3"]["object"]["key"]
         # TODO: use file size and extension with copper api
         object_size = record["s3"]["object"]["size"]
         file_extension = object_key.split(".")[-1]
+
     s3 = boto3.resource(
         service_name="s3",
     )
@@ -21,17 +23,17 @@ def lambda_handler(event, context):
     param_store = boto3.client("ssm")
     try:
         splunk_host = param_store.get_parameter(
-            Name=os.environ["splunk_host"], WithDecryption=False
+            Name=os.environ["splunk_host_path"], WithDecryption=False
         )
         splunk_host = splunk_host["Parameter"]["Value"]
 
         splunk_hec_token = param_store.get_parameter(
-            Name=os.environ["splunk_hec_token"], WithDecryption=False
+            Name=os.environ["splunk_hec_token_path"], WithDecryption=False
         )
         splunk_hec_token = splunk_hec_token["Parameter"]["Value"]
 
         copper_api_token = param_store.get_parameter(
-            Name=os.environ["copper_api_token"], WithDecryption=False
+            Name=os.environ["copper_api_token_path"], WithDecryption=False
         )
 
         copper_api_token = copper_api_token["Parameter"]["Value"]
