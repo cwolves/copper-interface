@@ -1,7 +1,6 @@
 # This script demonstrates how to send logs to Copper's API
 # At the bottom of the script, if __name__ == "__main__" you can pass in variables to send logs to Splunk HEC or MSFT Sentinel
 # if you don't want to send logs to Splunk HEC or MSFT Sentinel, you can leave those variables as None, but you must pass an api token
-# If you don't have a Copper API token, you can get one from https://cwolves.com/dashboard/api-tokens/
 #
 # If you want to try out the API:
 # 1. get an API token from https://cwolves.com/dashboard/api-tokens/

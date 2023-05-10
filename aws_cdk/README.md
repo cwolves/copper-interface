@@ -48,11 +48,11 @@ You should be comfortable using the AWS CLI, CDK, and Python.
 
    ![SSM Parameter Values](./readme_img/set_splunk_param.png)
 
-6. Now that everything is set up, drop files into the bucket `copperinterfacestack-copperlogsdestination`. The files should be in the json format. The files will be processed, reduced in size, and sent to the Splunk HEC endpoint you configured.
+6. Now that everything is set up, drop files into the bucket that was created. The files should be in the json format. The files will be processed, reduced in size, and sent to the Splunk HEC endpoint you configured.
 
    ![Bucket](./readme_img/logs_bucket.png)
 
-7. At anytime, if you'd like to completely the resources you created:
+7. At anytime, if you'd like to completely remove the resources you created:
 
    `cdk destroy`
 

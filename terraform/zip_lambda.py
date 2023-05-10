@@ -2,7 +2,7 @@ import zipfile
 import os
 
 # Path to your Python code directory
-code_dir = "./lambda/forwarder/"
+code_dir = "./lambda/forwarder"
 
 # Path to the directory where you installed the libraries using `pip install -t`
 libs_dir = "./lambda/forwarder_libs"

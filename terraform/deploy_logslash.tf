@@ -1,10 +1,12 @@
-
-
-
-
+# This file is a template to deploy a bucket, lambda, and permissions to forward logs to Copper.
+# We've anticipated you will make bespoke changes according to your cloud environment, please contact thatcher@cwolves.com for support :)
 provider "aws" {
-  region = "us-west-2" # Replace with your desired region
+  region = "us-west-2"
 }
+
+# source the current region from the aws provider
+data "aws_region" "current" {}
+
 
 # replace this with the name of the bucket you want to create
 # if you have a bucket you want to use already:
@@ -50,7 +52,6 @@ resource "aws_ssm_parameter" "copper_api_token" {
 }
 
 # bucket to put logs
-# TODO: change name or remove if you are bringing your own bucket
 resource "aws_s3_bucket" "logs_bucket" {
   bucket = local.bucket_name
 }
@@ -107,6 +108,14 @@ resource "aws_iam_role_policy_attachment" "lambda_execution_permissions" {
   role       = aws_iam_role.lambda_execution.name
 }
 
+resource "aws_lambda_permission" "allow_bucket" {
+  statement_id  = "AllowExecutionFromS3Bucket"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.log_forwarder.arn
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.logs_bucket.arn
+}
+
 # This lambda function pulls downloads logs from a bucket and forwards them to the Copper API.
 # It is triggered by Create Events on the bucket.
 resource "aws_lambda_function" "log_forwarder" {
@@ -114,9 +123,9 @@ resource "aws_lambda_function" "log_forwarder" {
   handler       = "send.lambda_handler"
   filename      = "lambda_forwarder.zip"
   role          = aws_iam_role.lambda_execution.arn
-  runtime     = "python3.9"
-  memory_size = 1024
-  timeout     = 300 # 5 minutes
+  runtime       = "python3.9"
+  memory_size   = 512
+  timeout       = 303 # 5 minutes
 
   environment {
     variables = {
@@ -128,8 +137,26 @@ resource "aws_lambda_function" "log_forwarder" {
   }
 }
 
+# log group for lambda
+resource "aws_cloudwatch_log_group" "lambda_logs_group" {
+  name = "/aws/lambda/${aws_lambda_function.log_forwarder.function_name}"
+}
 
+# log stream
+resource "aws_cloudwatch_log_stream" "lambda_logs_stream" {
+  name           = "log_forwarder"
+  log_group_name = aws_cloudwatch_log_group.lambda_logs_group.name
+}
 
+# permission for cloudwatch logs to invoke lambda
+resource "aws_lambda_permission" "cloudwatch_logs_permission" {
+  statement_id  = "AllowExecutionFromCloudWatchLogs"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.log_forwarder.arn
+  principal     = "logs.${data.aws_region.current.name}.amazonaws.com"
+
+  source_arn = aws_cloudwatch_log_group.lambda_logs_group.arn
+}
 
 # this notification triggers the lambda function when a file is created in the bucket
 resource "aws_s3_bucket_notification" "logs_bucket_notification" {
@@ -139,5 +166,7 @@ resource "aws_s3_bucket_notification" "logs_bucket_notification" {
     lambda_function_arn = aws_lambda_function.log_forwarder.arn
     events              = ["s3:ObjectCreated:*"]
   }
+
+  depends_on = [aws_lambda_permission.allow_bucket]
 }
 
