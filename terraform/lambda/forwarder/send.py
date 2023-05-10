@@ -5,7 +5,7 @@ import os
 
 
 def lambda_handler(event, context):
-    print('triggered', eventx)
+    print('triggered', event)
     for record in event["Records"]:
         bucket_name = record["s3"]["bucket"]["name"]
         object_key = record["s3"]["object"]["key"]
