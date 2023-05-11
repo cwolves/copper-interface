@@ -9,7 +9,7 @@ In summary, to use our API:
 
 Below, you will find documentation on how to use our API. There are 3 ways to get started:
 
-1. Use our API directly by *sending* a POST request to our API. ([API Guide](./direct_to_api/README.md))
+1. Use our API *directly* by sending a POST request to our API. ([API Guide](./direct_to_api/README.md))
 2. Use Terraform to quickly create a stack in your AWS account. This will create a bucket in AWS that will forward file data to our API. ([Terraform Guide](./terraform/README.md))
 3. Use the AWS CDK to quickly create a stack in your AWS account. This will create a bucket in AWS that will forward file data to our API. ([AWS CDK Guide](./aws_cdk/README.md))
 
