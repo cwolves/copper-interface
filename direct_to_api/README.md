@@ -14,7 +14,7 @@ Request Body:
 
 | Name                 | Type   | Required | Description                                                                                                                                           |
 | -------------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| json_log_str         | array  | Yes      | A JSON array of strings. Each item can be either JSON or XML format. If you have Windows Event Logs, each event should be a string item in the array. |
+| log_data         | array  | Yes      | A JSON array of strings. Each item can be either JSON or XML format. If you have Windows Event Logs, each event should be a string item in the array. |
 | api_token            | string | Yes      | A Cwolves API token, visit <https://cwolves.com/dashboard/api-tokens/>.                                                                               |
 | splunk_hec_token     | string | No       | A token for Splunk HEC.                                                                                                                               |
 | splunk_host          | string | No       | The Splunk host. e.g.                                                                                                                                 |
@@ -37,14 +37,14 @@ Example Requests:
 
 ```json
 {
-  "json_log_str": "[{\"log\": \"logdata1\"}, {\"log\": \"logdata2\"}]",
+  "log_data": "[{\"log\": \"logdata1\"}, {\"log\": \"logdata2\"}]",
   "api_token": "cw-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 }
 ```
 
 ```json
 {
-  "json_log_str": "[{\"log\": \"logdata1\"}, {\"log\": \"logdata2\"}]",
+  "log_data": "[{\"log\": \"logdata1\"}, {\"log\": \"logdata2\"}]",
   "api_token": "cw-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "splunk_hec_token": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "splunk_host": "prd-x-xxxxx",
@@ -54,7 +54,7 @@ Example Requests:
 
 ```json
 {
-  "json_log_str": "[{\"log\": \"logdata1\"}, {\"log\": \"logdata2\"}]",
+  "log_data": "[{\"log\": \"logdata1\"}, {\"log\": \"logdata2\"}]",
   "api_token": "cw-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "sentinel_customer_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "sentinel_shared_key": "xxxxxxxxxxxxxxxxxxxxxxxx/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx==",
