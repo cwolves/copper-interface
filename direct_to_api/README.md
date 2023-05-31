@@ -14,10 +14,10 @@ Request Body:
 
 | Name                 | Type   | Required | Description                                                                                                                                           |
 | -------------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| log_data         | array  | Yes      | A JSON array of strings. Each item can be either JSON or XML format. If you have Windows Event Logs, each event should be a string item in the array. |
+| log_data             | array  | Yes      | A JSON array of strings. Each item can be either JSON or XML format. If you have Windows Event Logs, each event should be a string item in the array. |
 | api_token            | string | Yes      | A Cwolves API token, visit <https://cwolves.com/dashboard/api-tokens/>.                                                                               |
 | splunk_hec_token     | string | No       | A token for Splunk HEC.                                                                                                                               |
-| splunk_host          | string | No       | The Splunk host. e.g.                                                                                                                                 |
+| splunk_host          | string | No       | The Splunk host. e.g. <https://prd-5-f232.splunkcloud.com>                                                                                            |
 | splunk_index         | string | No       | The desired index for Splunk HEC.                                                                                                                     |
 | sentinel_customer_id | string | No       | The customer ID for Microsoft Sentinel.                                                                                                               |
 | sentinel_shared_key  | string | No       | The shared key for Microsoft Sentinel.                                                                                                                |
@@ -47,7 +47,7 @@ Example Requests:
   "log_data": "[{\"log\": \"logdata1\"}, {\"log\": \"logdata2\"}]",
   "api_token": "cw-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
   "splunk_hec_token": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-  "splunk_host": "prd-x-xxxxx",
+  "splunk_host": "https://prd-x-xxxxx.splunkcloud.com",
   "splunk_index": "main"
 }
 ```
@@ -72,7 +72,7 @@ response = requests.post(
          "log_data": "[{\"log\": \"logdata1\"}, {\"log\": \"logdata2\"}]"
          "api_token": 'cw-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
          # optional, pass in desired index for Splunk HEC
-         "splunk_host": 'prd-x-xxxxx',
+         "splunk_host": 'https://prd-x-xxxxx.splunkcloud.com',
          "splunk_hec_token": 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
          "splunk_index": 'main',
          # optional, pass in desired log type for MSFT Sentinel

@@ -129,7 +129,7 @@ if __name__ == "__main__":
 
     # OPTIONAL (SPLUNK): pass parameters to forward to splunk HEC
     # splunk_hec_token = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-    # splunk_host = "prd-x-xxxxx"
+    # splunk_host = "https://prd-x-xxxxx.splunkcloud.com"
     # splunk_index = "main"
     # OPTIONAL (SENTINEL): pass parameters to forward to MSFT sentinel
     # sentinel_customer_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
