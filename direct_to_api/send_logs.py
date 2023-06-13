@@ -13,8 +13,6 @@
 # You can use your own log data by replacing the example_logs.json file with your own data
 
 
-
-
 import time
 import requests
 import json
@@ -90,6 +88,7 @@ def send_logs_to_cwolves(
                 json={
                     "log_data": log_data,
                     "api_token": api_token,
+                    "log_type": "json",
                     # optional, pass in desired index for Splunk HEC
                     "splunk_host": splunk_host,
                     "splunk_hec_token": splunk_hec_token,

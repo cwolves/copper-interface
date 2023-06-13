@@ -16,6 +16,7 @@ Request Body:
 | -------------------- | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | json_log_str         | array  | Yes      | A JSON array of strings. Each item can be either JSON or XML format. If you have Windows Event Logs, each event should be a string item in the array. |
 | api_token            | string | Yes      | A Cwolves API token, visit <https://cwolves.com/dashboard/api-tokens/>.                                                                               |
+| log_type             | string | Yes      | The type of log data. e.g. "json", "xml", "txt".                                                                                                      |
 | splunk_hec_token     | string | No       | A token for Splunk HEC.                                                                                                                               |
 | splunk_host          | string | No       | The Splunk host. e.g.                                                                                                                                 |
 | splunk_index         | string | No       | The desired index for Splunk HEC.                                                                                                                     |
@@ -71,6 +72,7 @@ response = requests.post(
       json={
          "log_data": "[{\"log\": \"logdata1\"}, {\"log\": \"logdata2\"}]"
          "api_token": 'cw-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+         "log_type": 'json',
          # optional, pass in desired index for Splunk HEC
          "splunk_host": 'prd-x-xxxxx',
          "splunk_hec_token": 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
