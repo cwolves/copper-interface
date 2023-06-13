@@ -24,7 +24,7 @@ class CopperInterfaceStack(Stack):
 
         # splunk parameters in order to send logs to splunk
         params = {
-            "splunk_host": "The host name of the splunk instance. e.g. prd-p-foxn4",
+            "splunk_host": "The host name of the splunk instance. e.g. https://prd-p-foxn4.splunkcloud.com",
             "splunk_hec_token": "The token used to send logs to splunk. e.g. 1234-5678-9012-3456",
             "copper_api_token": "The token from cwolves.com to give access to the Copper API",
         }

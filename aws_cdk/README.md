@@ -70,7 +70,7 @@ The bucket is configured to send an event notification to a lambda function when
 
 ### Systems Manager Parameter Store
 
-The stack initializes three parameters that you need to update with your own values. The first is `splunk_host` which is the hostname of your Splunk instance (e.g. 'prd-p-foxn4'). The second is `splunk_hec_token` which is the Authorization token for a Splunk HEC endpoint that you created. The third is `copper_api_token`
+The stack initializes three parameters that you need to update with your own values. The first is `splunk_host` which is the hostname of your Splunk instance (e.g. 'https://prd-p-foxn4.splunkcloud.com'). The second is `splunk_hec_token` which is the Authorization token for a Splunk HEC endpoint that you created. The third is `copper_api_token`
 
 ### Forwarder Lambda
 
