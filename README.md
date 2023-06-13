@@ -1,8 +1,8 @@
 # Copper Interface
 
-Copper allows you to send your logs to a single endpoint, and have them automatically deduplicated and aggregated. Optionally, Copper can be configured to forward logs to a Splunk HEC or Sentinel Log Analytics workspace.
+Copper allows you to send your logs to a single endpoint to be deduplicated and aggregated intelligently. Optionally, Copper can be configured to forward logs to a Splunk HEC or Sentinel Log Analytics workspace.
 
-This repository contains infrastructure as code, and examples to quickly get started with the Copper API.
+This repository contains infrastructure as code, examples, and an API specification to quickly get started with the Copper API.
 
 In summary, to use our API:
 
@@ -12,10 +12,10 @@ In summary, to use our API:
 Below, you will find documentation on how to use our API. There are 3 ways to get started:
 
 1. Use our API _directly_ by sending a POST request to our API. ([API Guide](./direct_to_api/README.md))
-2. Use Terraform to quickly create a stack in your AWS account. This will create a bucket in AWS that will forward file data to our API. ([Terraform Guide](./terraform/README.md))
-3. Use the AWS CDK to quickly create a stack in your AWS account. This will create a bucket in AWS that will forward file data to our API. ([AWS CDK Guide](./aws_cdk/README.md))
+2. Use Terraform to quickly create a stack in your AWS account. This will create a bucket in AWS that will forward log data from files to our API. ([Terraform Guide](./terraform/README.md))
+3. Use the AWS CDK to quickly create a stack in your AWS account. This will create a bucket in AWS that will forward log data from files to our API. ([AWS CDK Guide](./aws_cdk/README.md))
 
-For any questions, feature requests, or suggestions reach out to thatcher@cwolves.com. I respond quickly!
+For any support, feature requests, or suggestions reach out to thatcher@cwolves.com. We respond quickly!
 
 ## What happens to my logs?
 
